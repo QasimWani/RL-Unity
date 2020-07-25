@@ -4,26 +4,39 @@ import torch.optim as optim
 from dqnetwork import DQNetwork
 import random
 
-class Agent():
-    """Defines the agent class for DQN using Double Q-learning and Prioritized Experience Replay architecture"""
-    def __init__(self, state_size=37, action_size=4, gamma=0.99, lr=0.001):
+class ReplayBuffer():
+    """Defines the standard fixed size Experience Replay"""
+    def __init__(self, buffer_size, batch_size):
         """
-        Initializes the model.
-        ----
+        Initializes a ReplayBuffer object
+        ---
         @param:
-        1. state_size: size of input # of states.
-        2. action_size: size of # of actions.
-        3. gamma: discounted return rate.
-        4. lr: learning rate for the model.
+        1. buffer_size: (int) max. length of the buffer (usually a deque or heap)
+        2. batch_size: (int) size of the buffer. usually, 32 or 64.
         """
-        self.state_size = state_size
-        self.action_size = action_size
-        self.input_features = [state_size, 128, 64, 32]
-        self.output_features = [128, 64, 32, action_size]
+        self.buffer_size = buffer_size
+        self.batch_size = batch_size
         
-        #Q-network : defines the 2 DQN (using doubling Q-learning architecture via fixed Q target)
-        self.qnetwork_local = DQNetwork(input_features, output_features)
-        self.qnetwork_target = DQNetwork(input_features, output_features)
+        #Experience Replay init
+        self.replay_memory = deque(maxlen=self.buffer_size) #initialize experience replay buffer (circular)
         
-        #define the optimizer
-        self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=lr)
+    def add(self, transition):
+        """
+        Appends to the underlying replay memory.
+        ---
+        @param:
+        1. transition: (tuple) set of state-action value pair.
+            when extracted, (state, action, reward, next_state, done)
+        """
+        self.replay_memory.append(transition) #store observed state-action tuples in replay memory.
+    
+    def sample(self):
+        """
+        Gausian based shuffling for retrieving experiences from the replay_memory.
+        """
+        experiences = random.sample(self.replay_memory, k=(self.batch_size if self.isSampling() else len(self.replay_memory)))
+        return tuple(zip(*experiences)) #unzips into individual states, actions, rewards, next_actions, done(s)
+    
+    def isSampling(self):
+        """Determines if sampling condition has been met, i.e. len(memory) > num_batches"""
+        return self.batch_size < len(self.replay_memory)
