@@ -23,7 +23,7 @@ class DQNetwork(nn.Module):
         super().__init__()
         self.state_size = input_features[0]#size of observational space
         self.action_size = output_features[-1] #size of action space
-        self.FC = []#initialize list of FC layers
+        self.FC = nn.ModuleList()#initialize list of FC layers
         self.Dropout = []#intitialize list of dropout layers
         
         #check to see if input_dim = output_dim

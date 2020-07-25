@@ -1,4 +1,5 @@
 import random
+from collections import deque
 
 class ReplayBuffer():
     """Defines the standard fixed size Experience Replay"""
