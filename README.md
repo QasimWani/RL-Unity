@@ -4,9 +4,8 @@ Using Double DQN, Prioritized Experience Replay (PER), and Dueling DQN architect
 ### Todo:
 
 - [x] Install unityagents w/ venv.
-- [ ] Create model (torch)
+- [x] Create model (torch)
 - [ ] Train model
 - [ ] Implement PER
-- [ ] Implement Dueling DQN
 - [ ] Cross-validate
 - [ ] fine-tune weights (upload)
