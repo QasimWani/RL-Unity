@@ -1,7 +1,3 @@
-import torch
-import torch.nn.functional as F
-import torch.optim as optim
-from dqnetwork import DQNetwork
 import random
 
 class ReplayBuffer():
