@@ -51,7 +51,6 @@ class DQNetwork(nn.Module):
         @Return:
         - model: the corresponding model
         """
-        state = torch.from_numpy(state).float().unsqueeze(0)
         for i in range(len(self.FC)):
             if(i == 0):
                 X = F.relu(self.FC[0](state))
