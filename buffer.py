@@ -35,8 +35,15 @@ class ReplayBuffer():
         Gausian based shuffling for retrieving experiences from the replay_memory.
         """
         experiences = random.sample(self.replay_memory, k=self.batch_size)
-        states, actions, rewards, next_states, done = tuple(zip(*experiences)) #unzips into individual states, actions, rewards, next_actions, done(s)
-        return Variable(torch.tensor(states)), Variable(torch.tensor(actions)), Variable(torch.tensor(rewards)), Variable(torch.tensor(next_states)), Variable(torch.tensor(done))
+        # states, actions, rewards, next_states, done = tuple(zip(*experiences)) #unzips into individual states, actions, rewards, next_actions, done(s)
+        # return Variable(torch.tensor(states)), Variable(torch.tensor(actions).long()), Variable(torch.tensor(rewards)), Variable(torch.tensor(next_states)), Variable(torch.tensor(done))
+        states = torch.from_numpy(np.vstack([e[0] for e in experiences if e is not None])).float()
+        actions = torch.from_numpy(np.vstack([e[1] for e in experiences if e is not None])).long()
+        rewards = torch.from_numpy(np.vstack([e[2] for e in experiences if e is not None])).float()
+        next_states = torch.from_numpy(np.vstack([e[3] for e in experiences if e is not None])).float()
+        dones = torch.from_numpy(np.vstack([e[4] for e in experiences if e is not None]).astype(np.uint8)).float()
+  
+        return (states, actions, rewards, next_states, dones)
     def isSampling(self):
         """Determines if sampling condition has been met, i.e. len(memory) > num_batches"""
         return self.batch_size < len(self.replay_memory)
