@@ -1,8 +1,11 @@
+import numpy as np
 import torch
 import torch.optim as optim
 from dqnetwork import DQNetwork
 import random
 from buffer import ReplayBuffer
+import torch.nn.functional as F
+
 
 #Define constants
 BUFFER_SIZE = int(1e5)  # replay buffer size
@@ -28,12 +31,12 @@ class Agent():
         """
         self.state_size = state_size
         self.action_size = action_size
-        self.input_features = [state_size, 128, 64, 32]
-        self.output_features = [128, 64, 32, action_size]
+        
+        self.gamma = gamma #define dicsounted return
         
         #Q-network : defines the 2 DQN (using doubling Q-learning architecture via fixed Q target)
-        self.qnetwork_local = DQNetwork(input_features, output_features)
-        self.qnetwork_target = DQNetwork(input_features, output_features)
+        self.qnetwork_local = DQNetwork()
+        self.qnetwork_target = DQNetwork()
         
         #define the optimizer
         self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=lr)
@@ -50,13 +53,12 @@ class Agent():
         """
         # Save experience in replay memory
         self.memory.add(transition)
-        self.target_update_counter = (self.target_update_counter + 1) % self.update_every
+        self.target_update_counter = (self.target_update_counter + 1) % self.update_every #cyclic update
         
         #Update target network to local network
-        if(self.target_update_counter == 0):
-            #primary condition to check if len(buffer) > batch_size
+        if(self.target_update_counter == 0 and self.memory.isSampling() == True):
             experiences = self.memory.sample()
-            self.train(experiences, self.gamma)
+            self.train(experiences)
     
     def get_action(self, state, eps=0.0):
         """
@@ -68,11 +70,11 @@ class Agent():
         - action = action chosen by either equiprobably π or using Q-table
         """
         state = torch.from_numpy(state).float().unsqueeze(0)
-        self.qnetwork_local.eval()
+        self.qnetwork_local.eval() #set in evaluation mode
         with torch.no_grad():
             action_val = self.qnetwork_local(state)
         
-        self.qnetwork_local.train()#train local network
+        self.qnetwork_local.train()#set in training mode
         
         #Epsilon-greedy selection
         if(random.random() > eps):#exploit
@@ -90,7 +92,7 @@ class Agent():
         
         #Implement SGD using Adam as regularizer
         Q_targets_next = self.qnetwork_target(next_states).detach().max(1)[0].unsqueeze(1)
-        Q_targets = rewards + (gamma * Q_targets_next * (1 - done))
+        Q_targets = rewards + (self.gamma * Q_targets_next * (1 - done))
         Q_expected = self.qnetwork_local(states).gather(1, actions)
         #set loss as mse.
         loss = F.mse_loss(Q_expected, Q_targets)
@@ -111,6 +113,5 @@ class Agent():
         2. target_model: (DQNetwork) target network model (weights will be copied into)
         """
         
-        target_model = TAU*local_model + (1 - TAU) * target_model
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
-            target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)
+            target_param.data.copy_(TAU*local_param.data + (1.0-TAU)*target_param.data)

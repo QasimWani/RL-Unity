@@ -2,7 +2,6 @@ import random
 import numpy as np
 from collections import deque
 import torch 
-from torch.autograd import Variable
 
 class ReplayBuffer():
     """Defines the standard fixed size Experience Replay"""
@@ -35,8 +34,6 @@ class ReplayBuffer():
         Gausian based shuffling for retrieving experiences from the replay_memory.
         """
         experiences = random.sample(self.replay_memory, k=self.batch_size)
-        # states, actions, rewards, next_states, done = tuple(zip(*experiences)) #unzips into individual states, actions, rewards, next_actions, done(s)
-        # return Variable(torch.tensor(states)), Variable(torch.tensor(actions).long()), Variable(torch.tensor(rewards)), Variable(torch.tensor(next_states)), Variable(torch.tensor(done))
         states = torch.from_numpy(np.vstack([e[0] for e in experiences if e is not None])).float()
         actions = torch.from_numpy(np.vstack([e[1] for e in experiences if e is not None])).long()
         rewards = torch.from_numpy(np.vstack([e[2] for e in experiences if e is not None])).float()
@@ -50,7 +47,7 @@ class ReplayBuffer():
     
     def __len__(self):
         """
-	@Override:
-	Return the current size of internal memory.
-	"""
+        @Override:
+        Return the current size of internal memory.
+        """
         return len(self.replay_memory)
