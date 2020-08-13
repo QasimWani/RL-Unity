@@ -11,7 +11,7 @@ class DQNetwork(nn.Module):
     Defines the feed forward NN used for the DQN Agent.
     inherits nn.modules class.
     """
-    def __init__(self, input_features, output_features, dropout_layers=[0.3, 0.1]):
+    def __init__(self, state_size=37, action_size=4, fc1=128, fc2=64, fc3=32):
         """
         Initializes the model.
         ------
@@ -20,27 +20,16 @@ class DQNetwork(nn.Module):
         2. output_features: list of corresponding output dimensions.
         3. dropout_layers: list of dropout layers; keep_probs value (stochastic) of length < num_layers
         """
-        super().__init__()
-        self.state_size = input_features[0]#size of observational space
-        self.action_size = output_features[-1] #size of action space
-        self.FC = nn.ModuleList()#initialize list of FC layers
-        self.Dropout = []#intitialize list of dropout layers
+        super(DQNetwork, self).__init__()
+        self.state_size = state_size
+        self.action_size = action_size
+        self.fc1 = nn.Linear(state_size, fc1)
+        self.dp1 = nn.Dropout(p=0.3)
+        self.fc2 = nn.Linear(fc1, fc2)
+        self.dp2 = nn.Dropout(p=0.1)
+        self.fc3 = nn.Linear(fc2, fc3)
+        self.fc4 = nn.Linear(fc3, action_size) #output layer
         
-        #check to see if input_dim = output_dim
-        if(len(input_features) != len(output_features)):
-            raise ValueError("lengths do not match. input dimension MUST equal output dimensions")
-        
-        #check to see if dropout dim = L - 1:
-        if(len(dropout_layers) >= len(input_features) - 1):
-            raise ValueError("dropout layers dimensions do not match appropriate size")
-            
-        for input_unit, output_unit in zip(input_features, output_features):
-            self.FC.append(nn.Linear(input_unit, output_unit, bias=True))#add Linear layers to the network
-        
-        #set dropout layers
-        for prob in dropout_layers:
-            self.Dropout.append(nn.Dropout(prob))#append dropout layers with keep_probs to NN.
-            
     def forward(self, state):
         """
         Build a network that performs feed forward for one pass, by mapping input_space, S -> action, A.
@@ -51,11 +40,21 @@ class DQNetwork(nn.Module):
         @Return:
         - model: the corresponding model
         """
-        for i in range(len(self.FC)):
-            if(i == 0):
-                X = F.relu(self.FC[0](state))
-            else:
-                X = F.relu(self.FC[i](X)) if (i < len(self.FC) - 1) else self.FC[i](X)
-            if(i < len(self.Dropout)):
-                X = self.Dropout[i](X)
-        return X
+        x = state
+        #Layer 1
+        x = self.fc1(x)
+        x = F.relu(x)
+        x = self.dp1(x)#apply first dropout
+        #Layer 2
+        x = self.fc2(x)
+        x = F.relu(x)
+        x = self.dp2(x)#apply second dropout
+        #Layer 3
+        x = self.fc3(x)
+        x = F.relu(x)
+        #Output layer
+        x = self.fc4(x)
+        return x #dim = self.action_size
+        
+        
+        
