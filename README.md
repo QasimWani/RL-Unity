@@ -5,7 +5,9 @@ Using Double DQN, Prioritized Experience Replay (PER), and Dueling DQN architect
 
 - [x] Install unityagents w/ venv.
 - [x] Create model (torch)
-- [ ] Train model
+- [x] Train model
 - [ ] Implement PER
-- [ ] Cross-validate
-- [ ] fine-tune weights (upload)
+- [x] Cross-validate
+- [x] fine-tune weights (upload)
+### Results:
+![](https://github.com/QasimWani/Enhanced_DQN-Unity/blob/master/output.gif)
