@@ -10,4 +10,4 @@ Using Double DQN, Prioritized Experience Replay (PER), and Dueling DQN architect
 - [x] Cross-validate
 - [x] fine-tune weights (upload)
 ### Results:
-![](https://github.com/QasimWani/Enhanced_DQN-Unity/blob/master/output.gif)
+![](https://github.com/QasimWani/Enhanced_DQN-Unity/blob/master/output/output.gif)
