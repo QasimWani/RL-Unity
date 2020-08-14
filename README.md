@@ -17,5 +17,5 @@ Using Double DQN, Prioritized Experience Replay (PER), and Dueling DQN architect
 ### Raw Score Plot:
 ![](https://github.com/QasimWani/Enhanced_DQN-Unity/blob/master/output/raw_score.png)
 
-### Rolling Mean Score Plot:
+### Rolling Mean Score Plot (window = 100):
 ![](https://github.com/QasimWani/Enhanced_DQN-Unity/blob/master/output/rolling_score.png)
