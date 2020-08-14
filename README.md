@@ -11,3 +11,11 @@ Using Double DQN, Prioritized Experience Replay (PER), and Dueling DQN architect
 - [x] fine-tune weights (upload)
 ### Results:
 ![](https://github.com/QasimWani/Enhanced_DQN-Unity/blob/master/output/output.gif)
+
+<p>Environment solved using DQN in 529 Episodes</p>
+
+### Raw Score Plot:
+![](https://github.com/QasimWani/Enhanced_DQN-Unity/blob/master/output/raw_score.png)
+
+### Rolling Mean Score Plot:
+![](https://github.com/QasimWani/Enhanced_DQN-Unity/blob/master/output/rolling_score.png)
