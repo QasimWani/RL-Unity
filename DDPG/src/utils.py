@@ -10,9 +10,6 @@ from collections import deque, namedtuple
 import torch
 
 ## ----------------------- ReplayBuffer ----------------------
-#Define Constants
-BUFFER_SIZE = 512
-MINI_BATCH = int(1e6)
 
 #Enable cuda if available
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -22,7 +19,7 @@ class ReplayBuffer():
     Implementation of a fixed size replay buffer as used in DQN algorithms.
     The goal of a replay buffer is to unserialize relationships between sequential experiences, gaining a better temporal understanding.
     """
-    def __init__(self, action_size, buffer_size=BUFFER_SIZE, batch_size=MINI_BATCH):
+    def __init__(self, action_size, buffer_size, batch_size):
         """
         Initializes the buffer.
         @Param:
