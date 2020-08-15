@@ -15,8 +15,8 @@ LR_ACTOR = 0.0001 #actor learning rate
 GAMMA = 0.99 #discount factor
 WEIGHT_DECAY = 0 #L2 weight decay 
 TAU = 0.001 #soft target update
-BUFFER_SIZE = 256 #Size of buffer to train from a single step
-MINI_BATCH = 400_000 #Max length of memory.
+BUFFER_SIZE = 128 #Size of buffer to train from a single step
+MINI_BATCH = int(1e6) #Max length of memory.
 
 N_LEARN_UPDATES = 10     # number of learning updates
 N_TIME_STEPS = 20       # every n time step do update
@@ -52,7 +52,7 @@ class Agent():
         #Replay memory
         self.memory = ReplayBuffer(self.action_size, BUFFER_SIZE, MINI_BATCH) #define experience replay buffer object
 
-    def step(self, state, action, reward, next_state, done):
+    def step(self, state, action, reward, next_state, done, time_step):
         """
         Saves an experience in the replay memory to learn from using random sampling.
         @Param:
@@ -65,10 +65,15 @@ class Agent():
 
         self.memory.add(state, action, reward, next_state, done) #append to memory buffer
 
+        # only learn every n_time_steps
+        if time_step % N_TIME_STEPS != 0:
+            return
+
         #check if enough samples in buffer. if so, learn from experiences, otherwise, keep collecting samples.
         if(len(self.memory) > MINI_BATCH):
-            experience = self.memory.sample()
-            self.learn(experience)
+            for _ in range(N_LEARN_UPDATES):
+                experience = self.memory.sample()
+                self.learn(experience)
 
     def reset(self):
         """Resets the noise process to mean"""

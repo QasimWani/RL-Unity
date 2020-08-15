@@ -58,8 +58,8 @@ class Actor(nn.Module):
         x = F.relu(x)
         
         #Layer #2
-        # x = self.fc2(x)
-        x = self.bn2(x)
+        x = self.fc2(x)
+        # x = self.bn2(x)
         x = F.relu(x)
 
         #Output
