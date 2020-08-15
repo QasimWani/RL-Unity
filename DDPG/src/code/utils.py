@@ -19,7 +19,7 @@ class ReplayBuffer():
     Implementation of a fixed size replay buffer as used in DQN algorithms.
     The goal of a replay buffer is to unserialize relationships between sequential experiences, gaining a better temporal understanding.
     """
-    def __init__(self, action_size, buffer_size, batch_size):
+    def __init__(self, action_size, buffer_size, batch_size, seed):
         """
         Initializes the buffer.
         @Param:
@@ -27,6 +27,7 @@ class ReplayBuffer():
         2. buffer_size: Maximum length of the buffer for extrapolating all experiences into trajectories. default - 1e6 (Source: DeepMind)
         3. batch_size: size of mini-batch to train on. default = 64.
         """
+        self.seed = random.seed(seed)
         self.action_size = action_size
         self.replay_memory = deque(maxlen=buffer_size) #Experience replay memory object
         self.batch_size = batch_size
@@ -65,11 +66,12 @@ class ReplayBuffer():
 class OUNoise:
     """Ornstein-Uhlenbeck process."""
 
-    def __init__(self, size, mu=0., theta=0.15, sigma=0.2):
+    def __init__(self, size, seed, mu=0., theta=0.15, sigma=0.2):
         """Initialize parameters and noise process."""
         self.mu = mu * np.ones(size)
         self.theta = theta
         self.sigma = sigma
+        self.seed = random.seed(seed)
         self.reset()
 
     def reset(self):
