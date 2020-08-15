@@ -2,8 +2,8 @@
 
 ### Algorithms:
 <ol>
-<li>Deep Q Network (DQN)</li>
-<li>Deep Deterministic Policy Gradient</li>
+<li>Value Based Method - Deep Q Network (DQN)</li>
+<li>Policy Based Method - Deep Deterministic Policy Gradient (DDPG)</li>
 <li>Multi Agent Reinforcement Learning using MADDPG</li>
 </ol>
 
