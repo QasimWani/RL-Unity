@@ -1,3 +1,2 @@
 *.py linguist-detectable=true
- *.ipynb linguist-detectable=false
- *.asp linguist-detectable=false
+*.asp linguist-detectable=false
