@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 class Actor(nn.Module):
     """Estimates the policy deterministically using tanh activation for continuous action space"""
-    def __init__(self, state_size=33, action_size=4, fc1=400, fc2=300):
+    def __init__(self, state_size=33, action_size=4, fc1=256, fc2=128):
         """
         @Param:
         1. state_size: number of observations, i.e. brain.vector_action_space_size
@@ -16,10 +16,10 @@ class Actor(nn.Module):
         super(Actor, self).__init__()
         #Layer 1
         self.fc1 = nn.Linear(state_size, fc1)
-        self.bn1 = nn.BatchNorm1d(fc1)
+        # self.bn1 = nn.BatchNorm1d(fc1)
         #Layer 2
         self.fc2 = nn.Linear(fc1, fc2) 
-        self.bn2 = nn.BatchNorm1d(fc2)
+        # self.bn2 = nn.BatchNorm1d(fc2)
         #Output layer
         self.mu = nn.Linear(fc2, action_size) # µ(s|θ) {Deterministic policy}
         
@@ -34,15 +34,13 @@ class Actor(nn.Module):
         
         f1 = 1./np.sqrt(self.fc1.weight.data.size()[0])
         self.fc1.weight.data.uniform_(-f1, f1)
-        self.fc1.bias.data.uniform_(-f1, f1)
+        # self.fc1.bias.data.uniform_(-f1, f1)
 
         f2 = 1./np.sqrt(self.fc2.weight.data.size()[0])
         self.fc2.weight.data.uniform_(-f2, f2)
-        self.fc2.bias.data.uniform_(-f2, f2)
+        # self.fc2.bias.data.uniform_(-f2, f2)
 
-        f3 = 0.003
-        self.mu.weight.data.uniform_(-f3, f3)
-        self.mu.bias.data.uniform_(-f3, f3)
+        self.mu.weight.data.uniform_(-3e-3, 3e-3)
         
     def forward(self, state):
         """
@@ -56,11 +54,11 @@ class Actor(nn.Module):
         x = state
         #Layer #1
         x = self.fc1(x)
-        x = self.bn1(x)
+        # x = self.bn1(x)
         x = F.relu(x)
         
         #Layer #2
-        x = self.fc2(x)
+        # x = self.fc2(x)
         x = self.bn2(x)
         x = F.relu(x)
 

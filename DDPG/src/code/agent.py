@@ -10,13 +10,16 @@ import torch.optim as optim
 
 # Parameters for continuous control are taken from DDPG paper.
 # Continuous Control with Deep Reinforcement Learning: https://arxiv.org/pdf/1509.02971.pdf
-LR_CRITIC = 1e-3 #critic learning rate
-LR_ACTOR = 1e-4 #actor learning rate
+LR_CRITIC = 0.0001 #critic learning rate
+LR_ACTOR = 0.0001 #actor learning rate
 GAMMA = 0.99 #discount factor
-WEIGHT_DECAY = 0.01 #L2 weight decay 
+WEIGHT_DECAY = 0 #L2 weight decay 
 TAU = 0.001 #soft target update
-BUFFER_SIZE = 512 #Size of buffer to train from a single step
-MINI_BATCH = int(1e6) #Max length of memory.
+BUFFER_SIZE = 256 #Size of buffer to train from a single step
+MINI_BATCH = 400_000 #Max length of memory.
+
+N_LEARN_UPDATES = 10     # number of learning updates
+N_TIME_STEPS = 20       # every n time step do update
 
 #Enable cuda if available
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -87,7 +90,7 @@ class Agent():
         #If training mode, i.e. add_noise = True, add noise to the model to learn a more accurate policy for current state.
         if(add_noise):
             action += self.noise.sample()
-        return action
+        return np.clip(action, -1, 1)
     
     def learn(self, experiences, gamma=GAMMA):
         """
