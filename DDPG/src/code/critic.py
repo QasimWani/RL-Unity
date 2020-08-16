@@ -20,10 +20,8 @@ class Critic(nn.Module):
         self.seed = torch.manual_seed(seed)
         #Layer 1
         self.fc1 = nn.Linear(state_size, fc1)
-        self.bn1 = nn.BatchNorm1d(fc1)
         #Layer 2
         self.fc2 = nn.Linear(fc1 + action_size, fc2) #the reasons why we're adding fc1 + action_size is because we need to map (state, action) -> Q-values. 
-        self.bn2 = nn.BatchNorm1d(fc2)
         #Output layer
         self.q = nn.Linear(fc2, 1) #Q-value
         
@@ -38,15 +36,12 @@ class Critic(nn.Module):
         
         f1 = 1./np.sqrt(self.fc1.weight.data.size()[0])
         self.fc1.weight.data.uniform_(-f1, f1)
-        self.fc1.bias.data.uniform_(-f1, f1)
 
         f2 = 1./np.sqrt(self.fc2.weight.data.size()[0])
         self.fc2.weight.data.uniform_(-f2, f2)
-        self.fc2.bias.data.uniform_(-f2, f2)
 
         f3 = 3e-3
         self.q.weight.data.uniform_(-f3, f3)
-        self.q.bias.data.uniform_(-f3, f3)
         
     def forward(self, state, action):
         """
@@ -59,13 +54,11 @@ class Critic(nn.Module):
         """
         #Layer #1
         x_state = self.fc1(state) #state_space -> fc1=400
-        # x_state = self.bn1(x_state)
         x_state = F.relu(x_state)
         
         #Layer #2
         x = torch.cat((x_state, action), dim=1) #Concatenate state with action. Note that the specific way of passing x_state into layer #2.
         x = self.fc2(x) #fc1=400 + action_space --> fc2=300
-        # x = self.bn2(x)
         x = F.relu(x)
 
         #Output
