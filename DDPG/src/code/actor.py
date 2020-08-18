@@ -17,10 +17,10 @@ class Actor(nn.Module):
         self.seed = torch.manual_seed(seed)
         #Layer 1
         self.fc1 = nn.Linear(state_size, fc1)
-        self.bn1 = nn.BatchNorm1d(fc1)
+        # self.bn1 = nn.BatchNorm1d(fc1)
         #Layer 2
         self.fc2 = nn.Linear(fc1, fc2) 
-        self.bn2 = nn.BatchNorm1d(fc2)
+        # self.bn2 = nn.BatchNorm1d(fc2)
         #Output layer
         self.mu = nn.Linear(fc2, action_size) # µ(s|θ) {Deterministic policy}
         
@@ -55,12 +55,12 @@ class Actor(nn.Module):
         x = state
         #Layer #1
         x = self.fc1(x)
-        x = self.bn1(x)
+        # x = self.bn1(x)
         x = F.relu(x)
         
         #Layer #2
         x = self.fc2(x)
-        x = self.bn2(x)
+        # x = self.bn2(x)
         x = F.relu(x)
 
         #Output
