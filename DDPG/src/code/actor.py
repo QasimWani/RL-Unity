@@ -22,7 +22,7 @@ class Actor(nn.Module):
         self.fc2 = nn.Linear(fc1, fc2) 
         # self.bn2 = nn.BatchNorm1d(fc2)
         #Output layer
-        self.mu = nn.Linear(fc2, action_size) # µ(s|θ) {Deterministic policy}
+        self.fc3 = nn.Linear(fc2, action_size) # µ(s|θ) {Deterministic policy}
         
         #Initialize Weights
         self.reset_parameters()
@@ -41,7 +41,7 @@ class Actor(nn.Module):
         self.fc2.weight.data.uniform_(-f2, f2)
         self.fc2.bias.data.uniform_(-f2, f2)
 
-        self.mu.weight.data.uniform_(-3e-3, 3e-3)
+        self.fc3.weight.data.uniform_(-3e-3, 3e-3)
         
     def forward(self, state):
         """
@@ -64,6 +64,6 @@ class Actor(nn.Module):
         x = F.relu(x)
 
         #Output
-        x = self.mu(x)
+        x = self.fc3(x)
         mu = torch.tanh(x)
         return mu

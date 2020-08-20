@@ -25,7 +25,7 @@ class Critic(nn.Module):
         self.fc2 = nn.Linear(fc1 + action_size, fc2) #the reasons why we're adding fc1 + action_size is because we need to map (state, action) -> Q-values. 
         # self.bn2 = nn.BatchNorm1d(fc2)
         #Output layer
-        self.q = nn.Linear(fc2, 1) #Q-value
+        self.fc3 = nn.Linear(fc2, 1) #Q-value
         
         #Initialize Weights
         self.reset_parameters()
@@ -45,8 +45,8 @@ class Critic(nn.Module):
         self.fc2.bias.data.uniform_(-f2, f2)
 
         f3 = 3e-3
-        self.q.weight.data.uniform_(-f3, f3)
-        self.q.bias.data.uniform_(-f3, f3)
+        self.fc3.weight.data.uniform_(-f3, f3)
+        self.fc3.bias.data.uniform_(-f3, f3)
         
     def forward(self, state, action):
         """
@@ -69,5 +69,5 @@ class Critic(nn.Module):
         x = F.relu(x)
 
         #Output
-        value = self.q(x) #fc2=300 --> 1
+        value = self.fc3(x) #fc2=300 --> 1
         return value
