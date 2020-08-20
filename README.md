@@ -13,5 +13,8 @@
 
 ![](https://github.com/QasimWani/RL-Unity/blob/master/DQN/output/output.gif)
 
-<p>Policy Based Method - DDPG {TODO}</p>
+<p>Policy Based Method - DDPG</p>
+
+![](https://github.com/QasimWani/RL-Unity/blob/master/DDPG/src/output/output.gif)
+
 <p>Multi-Agent RL - MADDPG {TODO}</p>
