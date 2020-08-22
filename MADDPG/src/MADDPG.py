@@ -7,7 +7,6 @@ from model import Actor, Critic
 
 BUFFER_SIZE = int(1e5)  # replay buffer size
 BATCH_SIZE = 256       # minibatch size
-N_LEARN_UPDATES = 10     # number of learning updates
 N_TIME_STEPS = 20       # every n time step do update
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -60,14 +59,13 @@ class MADDPG():
         self.memory.add(state[0], state[1], action[0], action[1], reward[0], reward[1], next_state[0], next_state[1], done[0], done[1]) #append to memory buffer
 
         # only learn every n_time_steps
-        if time_step % N_TIME_STEPS != 0:
-            return
+        # if time_step % N_TIME_STEPS != 0:
+        #     return
 
         #check if enough samples in buffer. if so, learn from experiences, otherwise, keep collecting samples.
-        if(len(self.memory) > BATCH_SIZE):
-            for _ in range(N_LEARN_UPDATES):
-                experience = self.memory.sample()
-                self.learn(experience)
+        if(time_step % N_TIME_STEPS == 0 and len(self.memory) > BATCH_SIZE):
+            experience = self.memory.sample()
+            self.learn(experience)
     
     def learn(self, experiences):
         """Train mini-batch from experiences"""
@@ -82,9 +80,9 @@ class MADDPG():
         actions_pred2 = self.agent2.actor_local(states2)
         
         #Gather agent 1 properties
-        self_ = {"state": states1, "action": actions1, "reward": rewards1, "next_state": next_states1, "done": dones1, "next_action": actions_next1, "prediction_action": actions_pred1}
+        self_ = {"state": states1, "action": actions1, "reward": rewards1, "next_state": next_states1, "done": dones1, "action_next": actions_next1, "predicted_action": actions_pred1}
         #Gather agent 2 properties
-        other = {"state": states2, "action": actions2, "reward": rewards2, "next_state": next_states2, "done": dones2, "next_action": actions_next2, "prediction_action": actions_pred2}
+        other = {"state": states2, "action": actions2, "reward": rewards2, "next_state": next_states2, "done": dones2, "action_next": actions_next2, "predicted_action": actions_pred2}
 
         self.agent1.learn(self_, other)
         self.agent2.learn(other, self_)

@@ -43,7 +43,7 @@ class Agent():
         #Critic network
         self.critic_local = Critic(self.state_size, self.action_size, random_seed).to(device)
         self.critic_target = Critic(self.state_size, self.action_size, random_seed).to(device)
-        self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR_CRITIC)
+        self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR_CRITIC, weight_decay=WEIGHT_DECAY)
 
         #Noise proccess
         self.noise = OUNoise(action_size, random_seed) #define Ornstein-Uhlenbeck process
@@ -79,28 +79,28 @@ class Agent():
         1. self_: Agent 1 - dict(state, action, reward, next_state, done, next_action, predicted_action)
         2. other: Agent 2 - dict(state, action, reward, next_state, done, next_action, predicted_action)
         """
-
         with torch.no_grad():
-            Q_targets_next = self.critic_target((self_.state, other.state), (self_.action_next, other.action_next))
+            Q_targets_next = self.critic_target((self_["state"], other["state"]), (self_["action_next"], other["action_next"]))
         
         #Update Critic network
-        Q_targets = self_.rewards + (GAMMA * Q_targets_next * (1 - self_.done)) #  r + γ * Q-values(a,s)
+        Q_targets = self_["reward"] + (GAMMA * Q_targets_next * (1 - self_["done"])) #  r + γ * Q-values(a,s)
 
         # Compute critic loss using MSE
-        Q_expected = self.critic_local((self_.state, other.state), (self_.action, other.action))
+        Q_expected = self.critic_local((self_["state"], other["state"]), (self_["action"], other["action"]))
         critic_loss = F.mse_loss(Q_expected, Q_targets)
 
         # Minimize the loss
         self.critic_optimizer.zero_grad()
-        critic_loss.backward()
-        nn.utils.clip_grad_norm_(self.critic_local.parameters(), 1) #clip gradients
+        critic_loss.backward(retain_graph=True) #save buffer
         self.critic_optimizer.step()
 
         # Compute actor loss
-        actor_loss = -self.critic_local((self_.state, other.state), (self_.predicted_action, other.predicted_action)).mean() #gets V(s,a)
+        actor_loss = -self.critic_local((self_["state"], other["state"]), (self_["predicted_action"], other["predicted_action"])).mean() #gets V(s,a)
         # Minimize the loss
         self.actor_optimizer.zero_grad()
-        actor_loss.backward()
+        torch.autograd.set_detect_anomaly(True)
+        print(actor_loss)
+        actor_loss.backward(retain_graph=True) #save buffer
         self.actor_optimizer.step()
 
         # ----------------------- update target networks ----------------------- #
