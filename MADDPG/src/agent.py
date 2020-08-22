@@ -1,5 +1,5 @@
 import numpy as np
-from utils import ReplayBuffer, OUNoise
+from utils import OUNoise
 from model import Actor, Critic
 import random
 
@@ -48,28 +48,6 @@ class Agent():
         #Noise proccess
         self.noise = OUNoise(action_size, random_seed) #define Ornstein-Uhlenbeck process
 
-        #Replay memory
-        self.memory = ReplayBuffer(self.action_size, BUFFER_SIZE, MINI_BATCH, random_seed) #define experience replay buffer object
-
-    # def step(self, state, action, reward, next_state, done):
-    #     """
-    #     Saves an experience in the replay memory to learn from using random sampling.
-    #     @Param:
-    #     1. state: current state, S.
-    #     2. action: action taken based on current state.
-    #     3. reward: immediate reward from state, action.
-    #     4. next_state: next state, S', from action, a.
-    #     5. done: (bool) has the episode terminated?
-    #     Exracted version for trajectory used in calculating the value for an action, a."""
-
-    #     self.memory.add(*state, *action, *reward, *next_state, *done) #append to memory buffer
-
-    #     #check if enough samples in buffer. if so, learn from experiences, otherwise, keep collecting samples.
-    #     if(len(self.memory) > MINI_BATCH):
-    #         for _ in range(N_LEARN_UPDATES):
-    #             experience = self.memory.sample()
-    #             self.learn(experience)
-
     def act(self, state, add_noise=True):
         """
         Returns a deterministic action given current state.
@@ -98,8 +76,8 @@ class Agent():
         of experiences when buffer_size = MINI_BATCH.
         Updates policy and value parameters accordingly
         @Param:
-        1. self_: Agent 1 - namedTuple[(state, action, reward, next_state, done, next_action, predicted_action)]
-        2. other: Agent 2 - namedTuple[(state, action, reward, next_state, done, next_action, predicted_action)]
+        1. self_: Agent 1 - dict(state, action, reward, next_state, done, next_action, predicted_action)
+        2. other: Agent 2 - dict(state, action, reward, next_state, done, next_action, predicted_action)
         """
 
         with torch.no_grad():
