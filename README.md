@@ -8,10 +8,16 @@
 </ol>
 
 
-### Outputs:
-<p>Value Based Method - DQN</p>
+## Outputs:
+## Value Based Method - DQN
+
+<p>In this Unity environment, the goal of the agent is to pick up yellow bananas while avoiding blue bananas.</p>
 
 ![](https://github.com/QasimWani/RL-Unity/blob/master/DQN/output/output.gif)
 
-<p>Policy Based Method - DDPG {TODO}</p>
+## Policy Based Method - DDPG
+<p>In this Unity environment, the goal of the agent is to move the double-jointed arm to the target location indicated by the torquoise sphere. This <a href="https://www.youtube.com/watch?v=ZVIxt2rt1_4">video</a> demonstrates a more practical approach of the Reacher Unity environment.</p>
+
+![](https://github.com/QasimWani/RL-Unity/blob/master/DDPG/src/output/output.gif)
+
 <p>Multi-Agent RL - MADDPG {TODO}</p>
