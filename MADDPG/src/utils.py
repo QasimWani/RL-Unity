@@ -33,13 +33,11 @@ class ReplayBuffer():
         self.batch_size = batch_size
         self.experience = namedtuple("Experience", field_names=["state_1", "state_2", "action_1", "action_2", "reward_1", "reward_2", "next_state_1", "next_state_2", "done_1", "done_2"]) #standard S,A,R,S',done for both agents (therefore, times 2)
         
-    def add(self, self_, other):
+    def add(self, state1, state2, action1, action2, reward1, reward2, next_state1, next_state2, done1, done2):
         """
         Adds an experience to existing memory
-        self_ : (state, action, reward, next_state, done)
-        other : (state, action, reward, next_state, done)
         """
-        trajectory = self.experience(*self_, *other)
+        trajectory = self.experience(state1, state2, action1, action2, reward1, reward2, next_state1, next_state2, done1, done2)
         self.replay_memory.append(trajectory)
     
     def sample(self):
