@@ -17,9 +17,9 @@ GAMMA = 0.99 #discount factor
 WEIGHT_DECAY = 0 #L2 weight decay 
 TAU = 1e-3 #soft target update
 BUFFER_SIZE = int(1e6) #Size of buffer to train from a single step
-MINI_BATCH = 512 #Max length of memory.
+MINI_BATCH = 256 #Max length of memory.
 
-N_LEARN_UPDATES = 5     # number of learning updates
+N_LEARN_UPDATES = 10     # number of learning updates
 N_TIME_STEPS = 20       # every n time step do update
 
 #Enable cuda if available
@@ -113,7 +113,7 @@ class Agent():
         1. state: current state, S.
         2. add_noise: (bool) add bias to agent, default = True (training mode)
         """
-        state = torch.from_numpy(state).float().unsqueeze(0).to(device) #typecast to torch.Tensor
+        state = torch.from_numpy(state).float().to(device) #typecast to torch.Tensor
         self.actor_local.eval() #set in evaluation mode
         with torch.no_grad(): #reset gradients
             action = self.actor_local(state).cpu().data.numpy() #deterministic action based on Actor's forward pass.
