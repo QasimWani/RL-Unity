@@ -31,33 +31,24 @@ class ReplayBuffer():
         self.action_size = action_size
         self.replay_memory = deque(maxlen=buffer_size) #Experience replay memory object
         self.batch_size = batch_size
-        self.experience = namedtuple("Experience", field_names=["state_1", "state_2", "action_1", "action_2", "reward_1", "reward_2", "next_state_1", "next_state_2", "done_1", "done_2"]) #standard S,A,R,S',done for both agents (therefore, times 2)
+        self.experience = namedtuple("Experience", field_names=["state", "action", "reward", "next_state", "done"]) #standard S,A,R,S',done
         
-    def add(self, state1, state2, action1, action2, reward1, reward2, next_state1, next_state2, done1, done2):
-        """
-        Adds an experience to existing memory
-        """
-        trajectory = self.experience(state1, state2, action1, action2, reward1, reward2, next_state1, next_state2, done1, done2)
+    def add(self, state, action, reward, next_state, done):
+        """Adds an experience to existing memory"""
+        trajectory = self.experience(state, action, reward, next_state, done)
         self.replay_memory.append(trajectory)
     
     def sample(self):
         """Randomly picks minibatches within the replay_buffer of size mini_batch"""
         experiences = random.sample(self.replay_memory, k=self.batch_size)
 
-        #Self
-        states_1 = torch.from_numpy(np.vstack([e.state_1 for e in experiences if e is not None])).float().to(device)
-        actions_1 = torch.from_numpy(np.vstack([e.action_1 for e in experiences if e is not None])).float().to(device)
-        rewards_1 = torch.from_numpy(np.vstack([e.reward_1 for e in experiences if e is not None])).float().to(device)
-        next_states_1 = torch.from_numpy(np.vstack([e.next_state_1 for e in experiences if e is not None])).float().to(device)
-        dones_1 = torch.from_numpy(np.vstack([e.done_1 for e in experiences if e is not None]).astype(np.uint8)).float().to(device)
+        states = torch.from_numpy(np.vstack([e.state for e in experiences if e is not None])).float().to(device)
+        actions = torch.from_numpy(np.vstack([e.action for e in experiences if e is not None])).float().to(device)
+        rewards = torch.from_numpy(np.vstack([e.reward for e in experiences if e is not None])).float().to(device)
+        next_states = torch.from_numpy(np.vstack([e.next_state for e in experiences if e is not None])).float().to(device)
+        dones = torch.from_numpy(np.vstack([e.done for e in experiences if e is not None]).astype(np.uint8)).float().to(device)
 
-        #Other agent
-        states_2 = torch.from_numpy(np.vstack([e.state_2 for e in experiences if e is not None])).float().to(device)
-        actions_2 = torch.from_numpy(np.vstack([e.action_2 for e in experiences if e is not None])).float().to(device)
-        rewards_2 = torch.from_numpy(np.vstack([e.reward_2 for e in experiences if e is not None])).float().to(device)
-        next_states_2 = torch.from_numpy(np.vstack([e.next_state_2 for e in experiences if e is not None])).float().to(device)
-        dones_2 = torch.from_numpy(np.vstack([e.done_2 for e in experiences if e is not None]).astype(np.uint8)).float().to(device)
-        return states_1, states_2, actions_1, actions_2, rewards_1, rewards_2, next_states_1, next_states_2, dones_1, dones_2
+        return states, actions, rewards, next_states, dones
 
     def __len__(self):#override default __len__ operator
         """Return the current size of internal memory."""
@@ -92,4 +83,4 @@ class OUNoise:
         x = self.state
         dx = self.theta * (self.mu - x) + self.sigma * np.array([random.random() for i in range(len(x))])
         self.state = x + dx
-        return self.state 
+        return self.state
