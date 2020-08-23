@@ -76,24 +76,22 @@ class Actor(nn.Module):
 
 class Critic(nn.Module):
     """Value approximator V(pi) as Q(s, a|θ)"""
-    def __init__(self, state_size=24, action_size=2, num_agents=2, seed=0, fc1=256, fc2=128):
+    def __init__(self, state_size=24, action_size=2, seed=0, fc1=256, fc2=128):
         """
         @Param:
         1. state_size: number of observations for 1 agent.
         2. action_size: number of actions for 1 agent.
-        3. num_agents: number of agents in the environment, i.e. len(env_info.agents)
-        4. seed: seed value for reproducibility. default = 0.
-        5. fc1: number of hidden units in the first fully connected layer. Default = 256.
-        6. fc2: number of hidden units in the second fully connected layer, default = 128.
+        3. seed: seed value for reproducibility. default = 0.
+        4. fc1: number of hidden units in the first fully connected layer. Default = 256.
+        5. fc2: number of hidden units in the second fully connected layer, default = 128.
         """
         super(Critic, self).__init__()
         self.seed = torch.manual_seed(seed)
-        self.full_observational_space = (state_size + action_size) * num_agents
         #Layer 1
-        self.fc1 = nn.Linear(self.full_observational_space, fc1)
+        self.fc1 = nn.Linear(state_size, fc1)
         self.bn1 = nn.BatchNorm1d(fc1)
         #Layer 2
-        self.fc2 = nn.Linear(fc1, fc2)
+        self.fc2 = nn.Linear(fc1 + action_size, fc2)
         self.bn2 = nn.BatchNorm1d(fc2)
         #Output layer
         self.fc3 = nn.Linear(fc2, 1) #Q-value
@@ -118,26 +116,22 @@ class Critic(nn.Module):
         self.fc3.weight.data.uniform_(-f3, f3)
         self.fc3.bias.data.uniform_(-f3, f3)
         
-    def forward(self, complete_state, complete_action):
+    def forward(self, state, action):
         """
-        Performs a single forward pass to map (state, action) to Q-value
+        Performs a single forward pass to map (state,action) to Q-value
         @Param:
-        1. complete_state: current observations of both agents (self and the other(s))
-        2. complete_action: immediate action to evaluate against of both agents (self and the other(s))
+        1. state: current observations, shape: (env.observation_space.shape[0],)
+        2. action: immediate action to evaluate against, shape: (env.action_space.shape[0],)
         @Return:
         - q-value
         """
-        #Unwrap values
-        self_state, other_state = complete_state
-        self_action, other_action = complete_action
-        #Concatenate values
-        full_observation = torch.cat((self_state, other_state, self_action, other_action), dim=1)
         #Layer #1
-        x = self.fc1(full_observation) #state_space -> fc1=400
+        x = self.fc1(state) #state_space -> fc1=400
         x = self.bn1(x)
         x = F.relu(x)
         
         #Layer #2
+        x = torch.cat((x, action), dim=1) #Concatenate state with action. Note that the specific way of passing x_state into layer #2.
         x = self.fc2(x) #fc1=400 + action_space --> fc2=300
         x = self.bn2(x)
         x = F.relu(x)
