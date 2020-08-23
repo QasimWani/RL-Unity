@@ -19,7 +19,7 @@ TAU = 1e-3 #soft target update
 BUFFER_SIZE = int(1e6) #Size of buffer to train from a single step
 MINI_BATCH = 512 #Max length of memory.
 
-N_LEARN_UPDATES = 10     # number of learning updates
+N_LEARN_UPDATES = 5     # number of learning updates
 N_TIME_STEPS = 20       # every n time step do update
 
 #Enable cuda if available
