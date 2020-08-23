@@ -1,7 +1,6 @@
 import numpy as np
 from utils import OUNoise, ReplayBuffer
-from actor import Actor
-from critic import Critic
+from model import Actor, Critic
 import random
 
 import torch
@@ -12,13 +11,13 @@ import torch.optim as optim
 # Parameters for continuous control are taken from DDPG paper.
 # Continuous Control with Deep Reinforcement Learning: https://arxiv.org/pdf/1509.02971.pdf
 
-LR_CRITIC = 1e-4 #critic learning rate
-LR_ACTOR = 1e-4 #actor learning rate
+LR_CRITIC = 1e-3 #critic learning rate
+LR_ACTOR = 1e-3 #actor learning rate
 GAMMA = 0.99 #discount factor
 WEIGHT_DECAY = 0 #L2 weight decay 
 TAU = 1e-3 #soft target update
 BUFFER_SIZE = int(1e6) #Size of buffer to train from a single step
-MINI_BATCH = 128 #Max length of memory.
+MINI_BATCH = 512 #Max length of memory.
 
 N_LEARN_UPDATES = 10     # number of learning updates
 N_TIME_STEPS = 20       # every n time step do update
