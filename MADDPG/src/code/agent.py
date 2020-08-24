@@ -12,10 +12,10 @@ import torch.optim as optim
 # Continuous Control with Deep Reinforcement Learning: https://arxiv.org/pdf/1509.02971.pdf
 
 LR_CRITIC = 1e-3 #critic learning rate
-LR_ACTOR = 1e-3 #actor learning rate
+LR_ACTOR = 1e-4 #actor learning rate
 GAMMA = 0.99 #discount factor
 WEIGHT_DECAY = 0.0 #L2 weight decay 
-TAU = 1e-3 #soft target update
+TAU = 2e-1 #soft target update
 BUFFER_SIZE = int(1e6) #Size of buffer to train from a single step
 MINI_BATCH = 1024 #Max length of memory.
 
