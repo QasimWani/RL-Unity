@@ -14,10 +14,10 @@ import torch.optim as optim
 LR_CRITIC = 1e-3 #critic learning rate
 LR_ACTOR = 1e-3 #actor learning rate
 GAMMA = 0.99 #discount factor
-WEIGHT_DECAY = 0 #L2 weight decay 
-TAU = 1e-3 #soft target update
+WEIGHT_DECAY = 0.0 #L2 weight decay 
+TAU = 2e-1 #soft target update
 BUFFER_SIZE = int(1e6) #Size of buffer to train from a single step
-MINI_BATCH = 256 #Max length of memory.
+MINI_BATCH = 1024 #Max length of memory.
 
 N_LEARN_UPDATES = 10     # number of learning updates
 N_TIME_STEPS = 20       # every n time step do update
@@ -27,16 +27,6 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Agent():
     """Main DDPG agent that extracts experiences and learns from them"""
-    actor_local = None
-    actor_target = None
-    actor_optimizer = None
-
-    critic_local = None
-    critic_target = None
-    critic_optimizer = None
-
-    memory = None
-
     def __init__(self, state_size=33, action_size=4, random_seed=0):
         """
         Initializes Agent object.
@@ -49,35 +39,21 @@ class Agent():
         self.seed = random.seed(random_seed)
 
         #Actor network
-        if(Agent.actor_local is None):
-            Agent.actor_local = Actor(self.state_size, self.action_size, random_seed).to(device)
-        if(Agent.actor_target is None):
-            Agent.actor_target = Actor(self.state_size, self.action_size, random_seed).to(device)
-        if(Agent.actor_optimizer is None):
-            Agent.actor_optimizer = optim.Adam(Agent.actor_local.parameters(), lr=LR_ACTOR)
-
-        self.actor_local = Agent.actor_local
-        self.actor_target = Agent.actor_target
-        self.actor_optimizer = Agent.actor_optimizer
+        self.actor_local = Actor(self.state_size, self.action_size, random_seed).to(device)
+        self.actor_target = Actor(self.state_size, self.action_size, random_seed).to(device)
+        self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=LR_ACTOR)
 
         #Critic network
-        if(Agent.critic_local is None):
-            Agent.critic_local = Critic(self.state_size, self.action_size, random_seed).to(device)
-        if(Agent.critic_target is None):
-            Agent.critic_target = Critic(self.state_size, self.action_size, random_seed).to(device)
-        if(Agent.critic_optimizer is None):
-            Agent.critic_optimizer = optim.Adam(Agent.critic_local.parameters(), lr=LR_CRITIC)
-
-        self.critic_local = Agent.critic_local
-        self.critic_target = Agent.critic_target
-        self.critic_optimizer = Agent.critic_optimizer
+        self.critic_local = Critic(self.state_size, self.action_size, random_seed).to(device)
+        self.critic_target = Critic(self.state_size, self.action_size, random_seed).to(device)
+        self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR_CRITIC)
 
         #Noise proccess
         self.noise = OUNoise(action_size, random_seed) #define Ornstein-Uhlenbeck process
 
         #Replay memory
-        if(Agent.memory is None):
-            Agent.memory = ReplayBuffer(self.action_size, BUFFER_SIZE, MINI_BATCH, random_seed) #define experience replay buffer object
+        if(self.memory is None):
+            self.memory = ReplayBuffer(self.action_size, BUFFER_SIZE, MINI_BATCH, random_seed) #define experience replay buffer object
 
     def step(self, time_step, state, action, reward, next_state, done):
         """
@@ -90,16 +66,16 @@ class Agent():
         5. done: (bool) has the episode terminated?
         Exracted version for trajectory used in calculating the value for an action, a."""
 
-        Agent.memory.add(state, action, reward, next_state, done) #append to memory buffer
+        self.memory.add(state, action, reward, next_state, done) #append to memory buffer
 
         # only learn every n_time_steps
         if time_step % N_TIME_STEPS != 0:
             return
 
         #check if enough samples in buffer. if so, learn from experiences, otherwise, keep collecting samples.
-        if(len(Agent.memory) > MINI_BATCH):
+        if(len(self.memory) > MINI_BATCH):
             for _ in range(N_LEARN_UPDATES):
-                experience = Agent.memory.sample()
+                experience = self.memory.sample()
                 self.learn(experience)
 
     def reset(self):
@@ -164,7 +140,8 @@ class Agent():
         # ----------------------- update target networks ----------------------- #
         self.soft_update(self.critic_local, self.critic_target, TAU)
         self.soft_update(self.actor_local, self.actor_target, TAU)                     
-
+    
+    @staticmethod
     def soft_update(self, local_model, target_model, tau):
         """Soft update model parameters. Copies model τ every experience.
         θ_target = τ*θ_local + (1 - τ)*θ_target
