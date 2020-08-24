@@ -7,7 +7,7 @@ import torch.nn.functional as F
 
 class Actor(nn.Module):
     """Estimates the policy deterministically using tanh activation for continuous action space"""
-    def __init__(self, state_size=24, action_size=2, seed=0, fc1=512, fc2=256):
+    def __init__(self, state_size=24, action_size=2, seed=2, fc1=128, fc2=64):
         """
         @Param:
         1. state_size: number of observations, i.e. brain.vector_action_space_size
@@ -37,11 +37,11 @@ class Actor(nn.Module):
         
         f1 = 1./np.sqrt(self.fc1.weight.data.size()[0])
         self.fc1.weight.data.uniform_(-f1, f1)
-        self.fc1.bias.data.uniform_(-f1, f1)
+        # self.fc1.bias.data.uniform_(-f1, f1)
 
         f2 = 1./np.sqrt(self.fc2.weight.data.size()[0])
         self.fc2.weight.data.uniform_(-f2, f2)
-        self.fc2.bias.data.uniform_(-f2, f2)
+        # self.fc2.bias.data.uniform_(-f2, f2)
 
         self.fc3.weight.data.uniform_(-3e-3, 3e-3)
         
@@ -76,7 +76,7 @@ class Actor(nn.Module):
 
 class Critic(nn.Module):
     """Value approximator V(pi) as Q(s, a|θ)"""
-    def __init__(self, state_size=24, action_size=2, seed=0, fc1=512, fc2=256, dropout=0.2):
+    def __init__(self, state_size=24, action_size=2, seed=2, fc1=128, fc2=64, dropout=0.2):
         """
         @Param:
         1. state_size: number of observations for 1 agent.

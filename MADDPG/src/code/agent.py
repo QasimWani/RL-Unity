@@ -15,19 +15,19 @@ LR_CRITIC = 1e-3 #critic learning rate
 LR_ACTOR = 1e-3 #actor learning rate
 GAMMA = 0.99 #discount factor
 WEIGHT_DECAY = 0.0 #L2 weight decay 
-TAU = 2e-1 #soft target update
+TAU = 1e-3 #soft target update
 BUFFER_SIZE = int(1e6) #Size of buffer to train from a single step
 MINI_BATCH = 1024 #Max length of memory.
 
 N_LEARN_UPDATES = 10     # number of learning updates
-N_TIME_STEPS = 20       # every n time step do update
+N_TIME_STEPS = 10       # every n time step do update
 
 #Enable cuda if available
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Agent():
     """Main DDPG agent that extracts experiences and learns from them"""
-    def __init__(self, state_size=33, action_size=4, random_seed=0):
+    def __init__(self, state_size=24, action_size=2, random_seed=0):
         """
         Initializes Agent object.
         @Param:
@@ -52,8 +52,7 @@ class Agent():
         self.noise = OUNoise(action_size, random_seed) #define Ornstein-Uhlenbeck process
 
         #Replay memory
-        if(self.memory is None):
-            self.memory = ReplayBuffer(self.action_size, BUFFER_SIZE, MINI_BATCH, random_seed) #define experience replay buffer object
+        self.memory = ReplayBuffer(self.action_size, BUFFER_SIZE, MINI_BATCH, random_seed) #define experience replay buffer object
 
     def step(self, time_step, state, action, reward, next_state, done):
         """
@@ -141,7 +140,6 @@ class Agent():
         self.soft_update(self.critic_local, self.critic_target, TAU)
         self.soft_update(self.actor_local, self.actor_target, TAU)                     
     
-    @staticmethod
     def soft_update(self, local_model, target_model, tau):
         """Soft update model parameters. Copies model τ every experience.
         θ_target = τ*θ_local + (1 - τ)*θ_target
