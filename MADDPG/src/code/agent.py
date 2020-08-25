@@ -65,17 +65,10 @@ class Agent():
         5. done: (bool) has the episode terminated?
         Exracted version for trajectory used in calculating the value for an action, a."""
 
-        self.memory.add(state, action, reward, next_state, done) #append to memory buffer
-
-        # only learn every n_time_steps
-        if time_step % N_TIME_STEPS != 0:
-            return
-
         #check if enough samples in buffer. if so, learn from experiences, otherwise, keep collecting samples.
         if(len(self.memory) > MINI_BATCH):
-            for _ in range(N_LEARN_UPDATES):
-                experience = self.memory.sample()
-                self.learn(experience)
+            experience = self.memory.sample()
+            self.learn(experience)
 
     def reset(self):
         """Resets the noise process to mean"""
