@@ -11,10 +11,10 @@ import torch.optim as optim
 # Parameters for continuous control are taken from DDPG paper.
 # Continuous Control with Deep Reinforcement Learning: https://arxiv.org/pdf/1509.02971.pdf
 
-LR_CRITIC = 1e-3 #critic learning rate
-LR_ACTOR = 1e-4 #actor learning rate
+LR_CRITIC = 2e-4 #critic learning rate
+LR_ACTOR = 2e-4 #actor learning rate
 WEIGHT_DECAY = 0.0 #L2 weight decay 
-TAU = 2e-1 #soft target update
+TAU = 1e-2 #soft target update
 
 #Enable cuda if available
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
