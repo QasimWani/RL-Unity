@@ -13,14 +13,8 @@ import torch.optim as optim
 
 LR_CRITIC = 1e-3 #critic learning rate
 LR_ACTOR = 1e-4 #actor learning rate
-GAMMA = 0.99 #discount factor
 WEIGHT_DECAY = 0.0 #L2 weight decay 
 TAU = 2e-1 #soft target update
-BUFFER_SIZE = int(1e6) #Size of buffer to train from a single step
-MINI_BATCH = 1024 #Max length of memory.
-
-N_LEARN_UPDATES = 10     # number of learning updates
-N_TIME_STEPS = 10       # every n time step do update
 
 #Enable cuda if available
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -46,36 +40,10 @@ class Agent():
         #Critic network
         self.critic_local = Critic(self.state_size, self.action_size, random_seed).to(device)
         self.critic_target = Critic(self.state_size, self.action_size, random_seed).to(device)
-        self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR_CRITIC)
+        self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR_CRITIC, weight_decay=WEIGHT_DECAY)
 
         #Noise proccess
         self.noise = OUNoise(action_size, random_seed) #define Ornstein-Uhlenbeck process
-
-        #Replay memory
-        self.memory = ReplayBuffer(self.action_size, BUFFER_SIZE, MINI_BATCH, random_seed) #define experience replay buffer object
-
-    def step(self, time_step, state, action, reward, next_state, done):
-        """
-        Saves an experience in the replay memory to learn from using random sampling.
-        @Param:
-        1. state: current state, S.
-        2. action: action taken based on current state.
-        3. reward: immediate reward from state, action.
-        4. next_state: next state, S', from action, a.
-        5. done: (bool) has the episode terminated?
-        Exracted version for trajectory used in calculating the value for an action, a."""
-
-        self.memory.add(state, action, reward, next_state, done) #append to memory buffer
-
-        # only learn every n_time_steps
-        if time_step % N_TIME_STEPS != 0:
-            return
-
-        #check if enough samples in buffer. if so, learn from experiences, otherwise, keep collecting samples.
-        if(len(self.memory) > MINI_BATCH):
-            for _ in range(N_LEARN_UPDATES):
-                experience = self.memory.sample()
-                self.learn(experience)
 
     def reset(self):
         """Resets the noise process to mean"""
@@ -99,7 +67,7 @@ class Agent():
             action += self.noise.sample()
         return np.clip(action, -1, 1)
     
-    def learn(self, experiences, gamma=GAMMA):
+    def learn(self, experiences, gamma):
         """
         Learn from a set of experiences picked up from a random sampling of even frequency (not prioritized)
         of experiences when buffer_size = MINI_BATCH.
@@ -147,7 +115,7 @@ class Agent():
         ======
             local_model: PyTorch model (weights will be copied from)
             target_model: PyTorch model (weights will be copied to)
-            tau (float): interpolation parameter 
+            tau (float): interpolation parameter
         """
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
             target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)
