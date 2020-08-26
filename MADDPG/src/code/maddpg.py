@@ -5,10 +5,10 @@ import torch
 
 #Define constants
 BUFFER_SIZE = int(1e5)  # replay buffer size
-BATCH_SIZE = 128        # minibatch size
+BATCH_SIZE = 256        # minibatch size
 GAMMA = 0.99            # discount factor
-N_LEARN_UPDATES = 10     # number of learning updates
-N_TIME_STEPS = 10       # every n time step do update
+N_LEARN_UPDATES = 2     # number of learning updates
+N_TIME_STEPS = 1        # every n time step do update
 
 class MADDPG():
     def __init__(self, num_agents=2, state_size=24, action_size=2, random_seed=2):
@@ -71,11 +71,16 @@ class MADDPG():
         for agent in self.agents:
             agent.learn(experiences, gamma)
             
-    def saveCheckPoints(self):
+    def saveCheckPoints(self, isDone):
         """Save the checkpoint weights of MARL params every 100 or so episodes"""
-        for i, agent in enumerate(self.agents):
-            torch.save(agent.actor_local.state_dict(),  f"../models/checkpoint/actor_agent_{i}.pth")
-            torch.save(agent.critic_local.state_dict(), f"../models/checkpoint/critic_agent_{i}.pth")
+        if(isDone):
+            for i, agent in enumerate(self.agents):
+                torch.save(agent.actor_local.state_dict(),  f"../models/checkpoint/actor_agent_{i}.pth")
+                torch.save(agent.critic_local.state_dict(), f"../models/checkpoint/critic_agent_{i}.pth")
+        else:
+            for i, agent in enumerate(self.agents):
+                torch.save(agent.actor_local.state_dict(),  f"../models/actor_agent_{i}.pth")
+                torch.save(agent.critic_local.state_dict(), f"../models/critic_agent_{i}.pth")
             
     def loadCheckPoints(self, isFinal=False):
         """Loads the checkpoint weight of MARL params"""
