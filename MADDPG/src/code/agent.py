@@ -42,6 +42,10 @@ class Agent():
         self.critic_target = Critic(self.state_size, self.action_size, random_seed).to(device)
         self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR_CRITIC, weight_decay=WEIGHT_DECAY)
 
+        #Perform hard copy
+        self.hard_copy_weights(self.actor_target, self.actor_local)
+        self.hard_copy_weights(self.critic_target, self.critic_local)
+
         #Noise proccess
         self.noise = OUNoise(action_size, random_seed) #define Ornstein-Uhlenbeck process
 
@@ -119,3 +123,14 @@ class Agent():
         """
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
             target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)
+
+    def hard_copy_weights(self, target, source):
+        """
+        Copy weights from source to target network
+        @Params:
+        1. target: copy weights into (destination).
+        2. source: copy weights from (source).
+        """
+        #source: https://github.com/mmuppidi/MADDPG_Tennis/blob/master/ddpg.py#L52-L55
+        for target_param, param in zip(target.parameters(), source.parameters()):
+            target_param.data.copy_(param.data)

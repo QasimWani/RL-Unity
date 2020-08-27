@@ -5,10 +5,9 @@ import torch
 
 #Define constants
 BUFFER_SIZE = int(1e5)  # replay buffer size
-BATCH_SIZE = 256        # minibatch size
+BATCH_SIZE = 128        # minibatch size
 GAMMA = 0.99            # discount factor
 N_LEARN_UPDATES = 2     # number of learning updates
-N_TIME_STEPS = 1        # every n time step do update
 
 class MADDPG():
     def __init__(self, num_agents=2, state_size=24, action_size=2, random_seed=2):
@@ -40,11 +39,10 @@ class MADDPG():
         for agent in self.agents:
             agent.reset()
             
-    def step(self, time_step, states, actions, rewards, next_states, dones):
+    def step(self, states, actions, rewards, next_states, dones):
         """
         Saves an experience in the replay memory to learn from using random sampling.
         @Param:
-        0. time_step: current time step for batch update calculation.
         1. states: current state, S.
         2. actions: action taken based on current state.
         3. rewards: immediate reward from state, action.
@@ -55,10 +53,6 @@ class MADDPG():
         # Save trajectories to Replay buffer
         for i in range(self.num_agents):
             self.memory.add(states[i], actions[i], rewards[i], next_states[i], dones[i])
-        
-        # only learn every n_time_steps
-        if time_step % N_TIME_STEPS != 0:
-            return
 
         #check if enough samples in buffer. if so, learn from experiences, otherwise, keep collecting samples.
         if(len(self.memory) > BATCH_SIZE):

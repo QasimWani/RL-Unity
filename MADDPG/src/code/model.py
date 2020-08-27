@@ -3,11 +3,16 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+def hidden_init(layer):
+    fan_in = layer.weight.data.size()[0]
+    lim = 1. / np.sqrt(fan_in)
+    return (-lim, lim)
+
 #Actor class: access to local information information only.
 
 class Actor(nn.Module):
     """Estimates the policy deterministically using tanh activation for continuous action space"""
-    def __init__(self, state_size=24, action_size=2, seed=2, fc1=256, fc2=128):
+    def __init__(self, state_size=24, action_size=2, seed=2, fc1=128, fc2=128):
         """
         @Param:
         1. state_size: number of observations, i.e. brain.vector_action_space_size
@@ -19,10 +24,10 @@ class Actor(nn.Module):
         self.seed = torch.manual_seed(seed)
         #Layer 1
         self.fc1 = nn.Linear(state_size, fc1)
-        # self.bn1 = nn.BatchNorm1d(fc1)
+        self.bn1 = nn.BatchNorm1d(fc1)
         #Layer 2
         self.fc2 = nn.Linear(fc1, fc2) 
-        # self.bn2 = nn.BatchNorm1d(fc2)
+        self.bn2 = nn.BatchNorm1d(fc2)
         #Output layer
         self.fc3 = nn.Linear(fc2, action_size) # µ(s|θ) {Deterministic policy}
         
@@ -34,15 +39,8 @@ class Actor(nn.Module):
         Resets the parameters by setting a noise from distribution following from its respective hidden unit size.
         Format for (-fx,fx) followed from the original paper.
         """
-        
-        f1 = 1./np.sqrt(self.fc1.weight.data.size()[0])
-        self.fc1.weight.data.uniform_(-f1, f1)
-        # self.fc1.bias.data.uniform_(-f1, f1)
-
-        f2 = 1./np.sqrt(self.fc2.weight.data.size()[0])
-        self.fc2.weight.data.uniform_(-f2, f2)
-        # self.fc2.bias.data.uniform_(-f2, f2)
-
+        self.fc1.weight.data.uniform_(*hidden_init(self.fc1))
+        self.fc2.weight.data.uniform_(*hidden_init(self.fc2))
         self.fc3.weight.data.uniform_(-3e-3, 3e-3)
         
     def forward(self, state):
@@ -54,15 +52,17 @@ class Actor(nn.Module):
         @Return:
         - µ(s|θ)
         """
+        if state.dim() == 1:
+            state = torch.unsqueeze(state,0)
         x = state
         #Layer #1
         x = self.fc1(x)
-        # x = self.bn1(x)
+        x = self.bn1(x)
         x = F.relu(x)
         
         #Layer #2
         x = self.fc2(x)
-        # x = self.bn2(x)
+        x = self.bn2(x)
         x = F.relu(x)
 
         #Output
@@ -76,7 +76,7 @@ class Actor(nn.Module):
 
 class Critic(nn.Module):
     """Value approximator V(pi) as Q(s, a|θ)"""
-    def __init__(self, state_size=24, action_size=2, seed=2, fc1=256, fc2=128, dropout=0.2):
+    def __init__(self, state_size=24, action_size=2, seed=2, fc1=128, fc2=128):
         """
         @Param:
         1. state_size: number of observations for 1 agent.
@@ -89,9 +89,9 @@ class Critic(nn.Module):
         self.seed = torch.manual_seed(seed)
         #Layer 1
         self.fc1 = nn.Linear(state_size, fc1)
+        self.bn1 = nn.BatchNorm1d(fc1)
         #Layer 2
         self.fc2 = nn.Linear(fc1 + action_size, fc2)
-        self.dropout = nn.Dropout(p=dropout)
         #Output layer
         self.fc3 = nn.Linear(fc2, 1) #Q-value
         
@@ -103,17 +103,9 @@ class Critic(nn.Module):
         Resets the parameters by setting a noise from distribution following from its respective hidden unit size.
         Format for (-fx,fx) followed from the original paper.
         """
-        f1 = 1./np.sqrt(self.fc1.weight.data.size()[0])
-        self.fc1.weight.data.uniform_(-f1, f1)
-        self.fc1.bias.data.uniform_(-f1, f1)
-
-        f2 = 1./np.sqrt(self.fc2.weight.data.size()[0])
-        self.fc2.weight.data.uniform_(-f2, f2)
-        self.fc2.bias.data.uniform_(-f2, f2)
-
-        f3 = 3e-3
-        self.fc3.weight.data.uniform_(-f3, f3)
-        self.fc3.bias.data.uniform_(-f3, f3)
+        self.fc1.weight.data.uniform_(*hidden_init(self.fc1))
+        self.fc2.weight.data.uniform_(*hidden_init(self.fc2))
+        self.fc3.weight.data.uniform_(-3e-3, 3e-3)
         
     def forward(self, state, action):
         """
@@ -124,15 +116,16 @@ class Critic(nn.Module):
         @Return:
         - q-value
         """
+        if state.dim() == 1:
+            state = torch.unsqueeze(state,0)
         #Layer #1
         x = self.fc1(state)
         x = F.relu(x)
-        
+        x = self.bn1(x)
         #Layer #2
         x = torch.cat((x, action), dim=1) #Concatenate state with action. Note that the specific way of passing x_state into layer #2.
         x = self.fc2(x) 
         x = F.relu(x)
-        x = self.dropout(x)
         #Output
         value = self.fc3(x)
         return value
