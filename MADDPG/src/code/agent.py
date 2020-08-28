@@ -131,6 +131,5 @@ class Agent():
         1. target: copy weights into (destination).
         2. source: copy weights from (source).
         """
-        #source: https://github.com/mmuppidi/MADDPG_Tennis/blob/master/ddpg.py#L52-L55
         for target_param, param in zip(target.parameters(), source.parameters()):
             target_param.data.copy_(param.data)
