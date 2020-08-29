@@ -66,7 +66,7 @@ class MADDPG():
             
     def saveCheckPoints(self, isDone):
         """Save the checkpoint weights of MARL params every 100 or so episodes"""
-        if(isDone):
+        if(isDone == False):
             for i, agent in enumerate(self.agents):
                 torch.save(agent.actor_local.state_dict(),  f"../models/checkpoint/actor_agent_{i}.pth")
                 torch.save(agent.critic_local.state_dict(), f"../models/checkpoint/critic_agent_{i}.pth")
