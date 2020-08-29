@@ -20,4 +20,8 @@
 
 ![](https://github.com/QasimWani/RL-Unity/blob/master/DDPG/src/output/output.gif)
 
-<p>Multi-Agent RL - MADDPG {TODO}</p>
+<p>Multi-Agent RL - MADDPG</p>
+
+<p>In this Unity environment, the goal of the agent is to maximize the rally between the two tennis agents, i.e. as the two agents pass the ball to each other without dropping, the higher the reward.</p>
+
+![](https://github.com/QasimWani/RL-Unity/blob/master/MADDPG/src/output/output.gif)
