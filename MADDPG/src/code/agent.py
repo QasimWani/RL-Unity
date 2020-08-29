@@ -1,5 +1,5 @@
 import numpy as np
-from utils import OUNoise, ReplayBuffer
+from utils import OUNoise
 from model import Actor, Critic
 import random
 
@@ -21,7 +21,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Agent():
     """Main DDPG agent that extracts experiences and learns from them"""
-    def __init__(self, state_size=24, action_size=2, random_seed=0):
+    def __init__(self, state_size, action_size, random_seed):
         """
         Initializes Agent object.
         @Param:
@@ -33,13 +33,13 @@ class Agent():
         self.seed = random.seed(random_seed)
 
         #Actor network
-        self.actor_local = Actor(self.state_size, self.action_size, random_seed).to(device)
-        self.actor_target = Actor(self.state_size, self.action_size, random_seed).to(device)
+        self.actor_local = Actor(state_size, action_size, random_seed).to(device)
+        self.actor_target = Actor(state_size, action_size, random_seed).to(device)
         self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=LR_ACTOR)
 
         #Critic network
-        self.critic_local = Critic(self.state_size, self.action_size, random_seed).to(device)
-        self.critic_target = Critic(self.state_size, self.action_size, random_seed).to(device)
+        self.critic_local = Critic(state_size, action_size, random_seed).to(device)
+        self.critic_target = Critic(state_size, action_size, random_seed).to(device)
         self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR_CRITIC, weight_decay=WEIGHT_DECAY)
 
         #Perform hard copy
