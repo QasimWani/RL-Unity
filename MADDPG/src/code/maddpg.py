@@ -7,7 +7,6 @@ import torch
 BUFFER_SIZE = int(1e5)  # replay buffer size
 BATCH_SIZE = 128        # minibatch size
 GAMMA = 0.99            # discount factor
-N_LEARN_UPDATES = 2     # number of learning updates
 
 class MADDPG():
     def __init__(self, num_agents=2, state_size=24, action_size=2, random_seed=2):
@@ -56,7 +55,7 @@ class MADDPG():
 
         #check if enough samples in buffer. if so, learn from experiences, otherwise, keep collecting samples.
         if(len(self.memory) > BATCH_SIZE):
-            for _ in range(N_LEARN_UPDATES):
+            for _ in range(self.num_agents):
                 experience = self.memory.sample()
                 self.learn(experience)
     
